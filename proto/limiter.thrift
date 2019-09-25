@@ -154,7 +154,7 @@ exception PlanNotFound {
 * Возникает в случае, если переданы некорректные параметры в одном или нескольких изменениях лимита
 */
 exception InvalidLimitParams {
-    1: required map<LimitUnit, string> wrong_limits
+    1: required map<LimitChange, string> wrong_limits
 }
 
 exception ClockInFuture {}
@@ -163,7 +163,6 @@ service Limiter {
     LimitClock Hold(1: LimitPlanChange plan_change) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
     LimitClock CommitPlan(1: LimitPlan plan) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
     LimitClock RollbackPlan(1: LimitPlan plan) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
-    LimitPlan GetPlan(1: PlanID id) throws (1: PlanNotFound e1)
     Limit GetLimitByID(1: LimitID id) throws (1:LimitNotFound e1)
     Balance GetBalanceByID(1: LimitID id, 2: LimitClock clock) throws (1:LimitNotFound e1, 2: ClockInFuture e2)
 }
