@@ -10,6 +10,7 @@ typedef i64    BatchID
 typedef i64    AccountID
 typedef string LimitRef
 typedef i64    DomainRevision
+typedef string LimitTimeZone
 
 typedef shumpune.Clock Clock
 typedef shumpune.Balance Balance
@@ -20,37 +21,38 @@ typedef base.InvalidRequest InvalidRequest
 *  cash - валютный лимит - ассоциирован с изменением сумм в какой-либо валюте
 *  count - счетный лимит - ассоциирован с количеством каких-либо операций в системе
 */
-enum LimitType {
-    cash
-    count
+union LimitType {
+   1: LimitTypeCash cash
+   2: LimitTypeCount count
 }
 
-/**
-* Структура данных, описывающая свойства сублимита:
-* account_id -идентификатор аккаунта ассоциированного с временным действием сублимита
-* time_range - время действия сублимита
-*/
-struct Sublimit {
-    1: required AccountID account_id
-    2: required LimitTimeRange time_range
+struct LimitTypeCash {
+    1: required base.CurrencySymbolicCode currency_sym_code
+}
+
+struct LimitTypeCount {}
+
+enum LimitLifetime {
+    hour
+    day
+    month
+    year
 }
 
 /**
 * Структура данных, описывающая свойства лимита:
 * id -идентификатор машины лимита
-* ref - идентификатор лимита в domain конфигурации
-* domain_revision - ревизия конфигурации
+* lifetime - время жизни лимита
 * type - тип лимита
-* sublimits - сублимиты лимита
+* time_zone - часовой пояс
 * description - описание (неизменяемо после создания лимита)
 */
 struct Limit {
     1: required LimitID id
-    2: required LimitRef ref
-    3: required DomainRevision domain_revision
-    4: required LimitType type
-    5: required list<Sublimit> sublimits
-    6: optional string description
+    2: required LimitLifetime lifetime
+    3: required LimitType type
+    4: required LimitTimeZone time_zone
+    5: optional string description
 }
 
 /**
@@ -73,13 +75,39 @@ struct LimitUnitCount {
 }
 
 /**
-* Описывает батч - набор изменений лимита, служит единицей атомарности операций в системе:
-* id -  идентификатор набора, уникален в пределах плана
+* Описывает параметры создания лимита:
+* lifetime - время жизни лимита
+* type - тип лимита
+* time_zone - часовой пояс
+*/
+struct LimitCreateParams {
+    1: required LimitLifetime lifetime
+    2: required LimitType type
+    3: required LimitTimeZone time_zone
+}
+
+/**
+* Описывает единицу изменения лимита:
+* id - id лимита, к которому применяется данное изменение
 * units - набор изменений лимита
+* create_params - если такого лимита нет или срок дейтсвия сублимита истек, то эти параметры
+*                 будут использованы чтобы проинициализировать новый лимит/сублимит.
+                  Так как мы не знаем существует ли лимит, то всегда прикладываем эти параметры.
+*/
+struct LimitChange {
+    1: required LimitID id
+    2: required list<LimitUnit> units
+    3: required LimitCreateParams create_params
+}
+
+/**
+* Описывает батч - набор изменений лимитов, служит единицей атомарности операций в системе:
+* id -  идентификатор набора, уникален в пределах плана
+* changes - набор изменений лимитов
 */
 struct LimitBatch {
     1: required BatchID id
-    2: required list<LimitUnit> units
+    2: required list<LimitChange> changes
 }
 
 /**
@@ -93,49 +121,25 @@ struct LimitPlan {
 }
 
 /**
-* Описывает параметры создания лимита:
-* ref - идентификатор лимита в domain конфигурации
-* domain_revision - ревизия конфигурации
-* create_time - время старта нового временного интервала лимита
-*/
-struct LimitCreateParams {
-    1: required LimitRef ref
-    2: required DomainRevision domain_revision
-    3: required base.Timestamp create_time
-}
-
-/**
 * Описывает единицу изменения плана:
 * id - id плана, к которому применяется данное изменение
 * batch - набор изменений, который нужно добавить в план
-* create_params - если такого лимита нет или срок дейтсвия сублимита истек, то эти параметры
-*                 будут использованы чтобы проинициализировать новый лимит/сублимит.
-                  Так как мы не знаем существует ли лимит, то всегда прикладываем эти параметры.
+* change_time - время изменения лимитов
 */
 struct LimitPlanChange {
     1: required PlanID id
     2: required LimitBatch batch
-    3: required LimitCreateParams create_params
-}
-
-/**
-* Описывает время действия лимита:
-* start_time - начало действия лимита
-* end_time - конец, если не бесконечно
-*/
-struct LimitTimeRange {
-    1: required base.Timestamp start_time
-    2: optional base.Timestamp end_time
+    3: required base.Timestamp change_time
 }
 
 /**
 * Описывает точку во времени жизни лимита:
-* clock - clock состояния счета аккаунта, привязанного к сублимиту
-* time_range - время действия сублимита, чтобы можно было его найти в лимите
+* clock - идентификатор изменения плана лимитов
+* change_time - время изменения лимитов
 */
 struct LimitClock {
     1: required Clock clock
-    2: required LimitTimeRange time_range
+    2: required base.Timestamp change_time
 }
 
 exception LimitNotFound {
@@ -155,7 +159,7 @@ exception InvalidLimitParams {
 
 exception ClockInFuture {}
 
-service Accounter {
+service Limiter {
     LimitClock Hold(1: LimitPlanChange plan_change) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
     LimitClock CommitPlan(1: LimitPlan plan) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
     LimitClock RollbackPlan(1: LimitPlan plan) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
