@@ -17,55 +17,62 @@ typedef base.InvalidRequest InvalidRequest
 *  cash - валютный лимит - ассоциирован с изменением сумм в какой-либо валюте
 *  count - счетный лимит - ассоциирован с количеством каких-либо операций в системе
 */
-union LimitType {
-   1: LimitTypeCash cash
-   2: LimitTypeCount count
+union Type {
+   1: TypeCash cash
+   2: TypeCount count
 }
 
-struct LimitTypeCash {
+struct TypeCash {
     1: required base.CurrencySymbolicCode currency_sym_code
 }
 
-struct LimitTypeCount {}
+struct TypeCount {}
 
-union LimitWorkPeriod {
-   1: LimitWorkPeriodHour hour
-   2: LimitWorkPeriodDay day
-   3: LimitWorkPeriodMonth month
-   4: LimitWorkPeriodYear year
+/**
+*  Описывает период работы лимита. Период работы в данном случае означает временной отрезок,
+*  связанный со значением лимита (счетом), в случае, когда изменение лимита попадает на новый временной отрезок
+*  создается новое значение лимита (счет) связанное с этим отрезком.
+*/
+
+union WorkPeriod {
+   1: WorkPeriodHour hour
+   2: WorkPeriodDay day
+   3: WorkPeriodMonth month
+   4: WorkPeriodYear year
 }
 
-struct LimitWorkPeriodHour {}
-struct LimitWorkPeriodDay {}
-struct LimitWorkPeriodMonth {}
-struct LimitWorkPeriodYear {}
+struct WorkPeriodHour {}
+struct WorkPeriodDay {}
+struct WorkPeriodMonth {}
+struct WorkPeriodYear {}
 
 struct Limit {
     1: required LimitID id
-    2: required LimitWorkPeriod work_period
-    3: required LimitType type
+    2: required WorkPeriod work_period
+    3: required Type type
     4: required TimeZone time_zone
     5: optional string description
 }
 
-union LimitUnit {
-   1: LimitUnitCash cash
-   2: LimitUnitCount count
+union Unit {
+   1: UnitCash cash
+   2: UnitCount count
 }
 
-struct LimitUnitCash {
+struct UnitCash {
     1: required base.Amount amount
     2: required base.CurrencySymbolicCode currency_sym_code
 }
 
-struct LimitUnitCount {
+struct UnitCount {
     1: required base.Amount amount
 }
 
-struct LimitCreateParams {
-    1: required LimitWorkPeriod work_period
-    2: required LimitType type
+struct CreateParams {
+    1: required WorkPeriod work_period
+    2: required Type type
     3: required TimeZone time_zone
+    4: optional string description
 }
 
 /**
@@ -76,20 +83,20 @@ struct LimitCreateParams {
 *                 будут использованы чтобы проинициализировать новый лимит/сублимит.
                   Так как мы не знаем существует ли лимит, то всегда прикладываем эти параметры.
 */
-struct LimitChange {
+struct Change {
     1: required LimitID id
-    2: required list<LimitUnit> units
-    3: required LimitCreateParams create_params
+    2: required list<Unit> units
+    3: required CreateParams create_params
 }
 
-struct LimitBatch {
+struct Batch {
     1: required BatchID id
-    2: required list<LimitChange> changes
+    2: required list<Change> changes
 }
 
-struct LimitPlan {
+struct Plan {
     1: required PlanID id
-    2: required list<LimitBatch> batch_list
+    2: required list<Batch> batch_list
 }
 
 /**
@@ -98,15 +105,15 @@ struct LimitPlan {
 * batch - набор изменений, который нужно добавить в план
 * change_time - время проведения операции по изменению лимитов
 */
-struct LimitPlanChange {
+struct PlanChange {
     1: required PlanID id
-    2: required LimitBatch batch
+    2: required Batch batch
     3: required base.Timestamp change_time
 }
 
 /**
 * Описывает точку во времени жизни лимита:
-* clock - идентификатор изменения плана лимитов
+* clock - время подсчета баланса лимитов
 * change_time - время проведения операции по изменению лимитов
 */
 struct LimitClock {
@@ -114,11 +121,9 @@ struct LimitClock {
     2: required base.Timestamp change_time
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*** Структура данных, описывающая свойства счета:
-* id - номер сета (генерируется аккаунтером)
-* own_amount - собственные средства (объём средств на счёте с учётом только подтвержденных операций)
+/*** Структура данных, описывающая свойства накопленного значения лимита:
+* id - номер счета (генерируется аккаунтером)
+* own_amount - значение счёта с учётом только подтвержденных операций
 * max_available_amount - максимально возможные доступные средства
 * min_available_amount - минимально возможные доступные средства
 * Где минимально возможные доступные средства - это объем средств с учетом подтвержденных и не подтвержденных
@@ -128,8 +133,6 @@ struct LimitClock {
 * Для максимального значения действует обратное условие.
 *
 * clock - время подсчета баланса
-*У каждого счёта должна быть сериализованная история, то есть наблюдаемая любым клиентом в определённый момент времени
-* последовательность событий в истории счёта должна быть идентична.
 */
 struct Balance {
     1: required AccountID id
@@ -150,7 +153,6 @@ struct VectorClock {
 
 struct LatestClock {
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exception LimitNotFound {
     1: required LimitID limit_id
@@ -164,15 +166,15 @@ exception PlanNotFound {
 * Возникает в случае, если переданы некорректные параметры в одном или нескольких изменениях лимита
 */
 exception InvalidLimitParams {
-    1: required map<LimitChange, string> wrong_limits
+    1: required map<Change, string> wrong_limits
 }
 
 exception ClockInFuture {}
 
 service Limiter {
-    LimitClock Hold(1: LimitPlanChange plan_change) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
-    LimitClock CommitPlan(1: LimitPlan plan) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
-    LimitClock RollbackPlan(1: LimitPlan plan) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
+    LimitClock Hold(1: PlanChange plan_change) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
+    LimitClock CommitPlan(1: Plan plan) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
+    LimitClock RollbackPlan(1: Plan plan) throws (1: InvalidLimitParams e1, 2: base.InvalidRequest e2)
     Limit GetLimitByID(1: LimitID id) throws (1:LimitNotFound e1)
     Balance GetBalanceByID(1: LimitID id, 2: LimitClock clock) throws (1:LimitNotFound e1, 2: ClockInFuture e2)
 }
