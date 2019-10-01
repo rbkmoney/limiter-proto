@@ -1,8 +1,7 @@
 namespace java com.rbkmoney.limiter
 namespace erlang limiter
 
-include "proto/shumpune.thrift"
-include "proto/base.thrift"
+include "base.thrift"
 
 typedef string LimitID
 typedef string PlanID
@@ -10,10 +9,7 @@ typedef i64    BatchID
 typedef i64    AccountID
 typedef string LimitRef
 typedef i64    DomainRevision
-typedef string LimitTimeZone
-
-typedef shumpune.Clock Clock
-typedef shumpune.Balance Balance
+typedef base.TimeZone TimeZone
 typedef base.InvalidRequest InvalidRequest
 
 /**
@@ -32,34 +28,26 @@ struct LimitTypeCash {
 
 struct LimitTypeCount {}
 
-enum LimitLifetime {
-    hour
-    day
-    month
-    year
+union LimitWorkPeriod {
+   1: LimitWorkPeriodHour hour
+   2: LimitWorkPeriodDay day
+   3: LimitWorkPeriodMonth month
+   4: LimitWorkPeriodYear year
 }
 
-/**
-* Структура данных, описывающая свойства лимита:
-* id -идентификатор машины лимита
-* lifetime - время жизни лимита
-* type - тип лимита
-* time_zone - часовой пояс
-* description - описание (неизменяемо после создания лимита)
-*/
+struct LimitWorkPeriodHour {}
+struct LimitWorkPeriodDay {}
+struct LimitWorkPeriodMonth {}
+struct LimitWorkPeriodYear {}
+
 struct Limit {
     1: required LimitID id
-    2: required LimitLifetime lifetime
+    2: required LimitWorkPeriod work_period
     3: required LimitType type
-    4: required LimitTimeZone time_zone
+    4: required TimeZone time_zone
     5: optional string description
 }
 
-/**
-*  Описывает одно изменение лимита в системе, может быть следующих типов:
-*  cash - изменение валютного лимита
-*  count - изменение счетного лимита
-*/
 union LimitUnit {
    1: LimitUnitCash cash
    2: LimitUnitCount count
@@ -74,16 +62,10 @@ struct LimitUnitCount {
     1: required base.Amount amount
 }
 
-/**
-* Описывает параметры создания лимита:
-* lifetime - время жизни лимита
-* type - тип лимита
-* time_zone - часовой пояс
-*/
 struct LimitCreateParams {
-    1: required LimitLifetime lifetime
+    1: required LimitWorkPeriod work_period
     2: required LimitType type
-    3: required LimitTimeZone time_zone
+    3: required TimeZone time_zone
 }
 
 /**
@@ -100,21 +82,11 @@ struct LimitChange {
     3: required LimitCreateParams create_params
 }
 
-/**
-* Описывает батч - набор изменений лимитов, служит единицей атомарности операций в системе:
-* id -  идентификатор набора, уникален в пределах плана
-* changes - набор изменений лимитов
-*/
 struct LimitBatch {
     1: required BatchID id
     2: required list<LimitChange> changes
 }
 
-/**
- * План состоит из набора батчей, который можно пополнить, подтвердить или отменить:
- * id - идентификатор плана, уникален в рамках системы
- * batch_list - набор батчей, связанный с данным планом
-*/
 struct LimitPlan {
     1: required PlanID id
     2: required list<LimitBatch> batch_list
@@ -124,7 +96,7 @@ struct LimitPlan {
 * Описывает единицу изменения плана:
 * id - id плана, к которому применяется данное изменение
 * batch - набор изменений, который нужно добавить в план
-* change_time - время изменения лимитов
+* change_time - время проведения операции по изменению лимитов
 */
 struct LimitPlanChange {
     1: required PlanID id
@@ -135,12 +107,50 @@ struct LimitPlanChange {
 /**
 * Описывает точку во времени жизни лимита:
 * clock - идентификатор изменения плана лимитов
-* change_time - время изменения лимитов
+* change_time - время проведения операции по изменению лимитов
 */
 struct LimitClock {
     1: required Clock clock
     2: required base.Timestamp change_time
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*** Структура данных, описывающая свойства счета:
+* id - номер сета (генерируется аккаунтером)
+* own_amount - собственные средства (объём средств на счёте с учётом только подтвержденных операций)
+* max_available_amount - максимально возможные доступные средства
+* min_available_amount - минимально возможные доступные средства
+* Где минимально возможные доступные средства - это объем средств с учетом подтвержденных и не подтвержденных
+* операций в определённый момент времени в предположении, что все планы с батчами, где баланс этого счёта изменяется в
+* отрицательную сторону, подтверждены, а планы, где баланс изменяется в положительную сторону,
+* соответственно, отменены.
+* Для максимального значения действует обратное условие.
+*
+* clock - время подсчета баланса
+*У каждого счёта должна быть сериализованная история, то есть наблюдаемая любым клиентом в определённый момент времени
+* последовательность событий в истории счёта должна быть идентична.
+*/
+struct Balance {
+    1: required AccountID id
+    2: required base.Amount own_amount
+    3: required base.Amount max_available_amount
+    4: required base.Amount min_available_amount
+    5: required Clock clock
+}
+
+union Clock {
+    1: VectorClock vector
+    2: LatestClock latest
+}
+
+struct VectorClock {
+    1: required base.Opaque state
+}
+
+struct LatestClock {
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exception LimitNotFound {
     1: required LimitID limit_id
