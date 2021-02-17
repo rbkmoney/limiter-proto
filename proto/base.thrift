@@ -35,6 +35,9 @@ typedef ID ExternalID
 typedef i64 DataRevision
 typedef i64 PartyRevision
 
+/** Непрозрачный для участника общения набор данных */
+typedef binary Opaque
+
 /**
  * Идентификатор валюты
  *

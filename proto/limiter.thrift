@@ -6,6 +6,21 @@ namespace erlang limiter
 typedef base.ID LimitChangeID
 typedef base.ID LimitID
 
+/**
+ * https://en.wikipedia.org/wiki/Vector_clock
+ **/
+struct VectorClock {
+    1: required base.Opaque state
+}
+
+/**
+* Структура, позволяющая установить причинно-следственную связь операций внутри сервиса
+**/
+union Clock {
+    // для новых операций
+    1: VectorClock vector
+}
+
 struct LimitPayload {
     1: optional base.Cash cash
 }
@@ -41,22 +56,22 @@ service Limiter {
         1: LimitNotFound e1,
         2: base.InvalidRequest e2
     )
-    void Hold(1: LimitChange change) throws (
+    Clock Hold(1: LimitChange change, 2: Clock clock) throws (
         1: LimitNotFound e1,
         3: base.InvalidRequest e2
     )
-    void Commit(1: LimitChange change) throws (
+    Clock Commit(1: LimitChange change, 2: Clock clock) throws (
         1: LimitNotFound e1,
         2: LimitChangeNotFound e2,
         3: base.InvalidRequest e3
     )
-    void PartialCommit(1: LimitChange change) throws (
+    Clock PartialCommit(1: LimitChange change, 2: Clock clock) throws (
         1: LimitNotFound e1,
         2: LimitChangeNotFound e2,
         3: base.InvalidRequest e3,
         4: InconsistentRequest e4
     )
-    void Rollback(1: LimitChange change) throws (
+    Clock Rollback(1: LimitChange change, 2: Clock clock) throws (
         1: LimitNotFound e1,
         2: LimitChangeNotFound e2,
         3: base.InvalidRequest e3
