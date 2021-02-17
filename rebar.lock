@@ -1,8 +1,1 @@
-[{<<"msgpack_proto">>,
-  {git,"git@github.com:rbkmoney/msgpack-proto.git",
-       {ref,"b558b0d9a91f2130e241bd186db171aee3e81e36"}},
-  0},
- {<<"shumpune_proto">>,
-  {git,"git@github.com:rbkmoney/shumpune-proto.git",
-       {ref,"4c87f03591cae3dad41504eb463d962af536b1ab"}},
-  0}].
+[].
