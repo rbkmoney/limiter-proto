@@ -2,7 +2,7 @@ include "base.thrift"
 include "limiter.thrift"
 
 namespace java com.rbkmoney.limiter.configurator
-namespace erlang cfg
+namespace erlang limiter_cfg
 
 typedef base.ID LimitName
 

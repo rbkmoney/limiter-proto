@@ -1,4 +1,5 @@
 namespace java com.rbkmoney.limiter.base
+namespace erlang limiter_base
 
 /**
  * Отметка во времени согласно RFC 3339.
