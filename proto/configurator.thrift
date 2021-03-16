@@ -9,6 +9,7 @@ typedef base.ID LimitID
 
 struct LimitCreateParams {
     1: required LimitID id
+    /** Идентификатор набора настроек создаваемого лимата, в будущем идентификатор заменит структура конфигурации */
     2: optional LimitName name
     3: optional string description
 }

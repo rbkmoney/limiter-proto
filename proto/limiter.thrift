@@ -23,14 +23,14 @@ union Clock {
 }
 
 struct LimitContext {
-    1: optional base.Timestamp operation_timestamp
-    2: optional PartyID party_id
-    3: optional ShopID shop_id
+    1: optional PartyID party_id
+    2: optional ShopID shop_id
+    3: optional LimitBody partial_body
 }
 
-struct LimitBody {
-    1: optional base.Cash cash
-    2: optional base.Amount amount
+union LimitBody {
+    1: base.Cash cash
+    2: base.Amount amount
 }
 
 struct Limit {
@@ -51,7 +51,7 @@ exception LimitNotFound {}
 exception LimitChangeNotFound {}
 
 service Limiter {
-    Limit Get(1: LimitID id, 2: LimitContext context) throws (
+    Limit Get(1: LimitID id, 2: Clock clock, 3: LimitContext context) throws (
         1: LimitNotFound e1,
         2: base.InvalidRequest e2
     )
