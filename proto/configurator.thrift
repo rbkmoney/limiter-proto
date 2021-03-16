@@ -7,6 +7,11 @@ namespace erlang limiter_cfg
 typedef base.ID LimitName
 typedef base.ID LimitID
 
+struct LimitConfig {
+    1: required LimitID id
+    2: optional string description
+}
+
 struct LimitCreateParams {
     1: required LimitID id
     /** Идентификатор набора настроек создаваемого лимата, в будущем идентификатор заменит структура конфигурации */
@@ -14,20 +19,17 @@ struct LimitCreateParams {
     3: optional string description
 }
 
-struct LimitNameNotFound {}
-
-exception InconsistentRequest {
-    1: optional LimitNameNotFound limit_name_not_found
-}
+exception LimitConfigNameNotFound {}
+exception LimitConfigNotFound {}
 
 service Configurator {
-    limiter.Limit Create(1: LimitCreateParams params) throws (
-        1: InconsistentRequest e1,
+    LimitConfig Create(1: LimitCreateParams params) throws (
+        1: LimitConfigNameNotFound e1,
         2: base.InvalidRequest e2
     )
 
-    limiter.Limit Get(1: limiter.LimitID id, 2: base.Timestamp timestamp) throws (
-        1: limiter.LimitNotFound e1,
+    LimitConfig Get(1: LimitID id) throws (
+        1: LimitConfigNotFound e1,
         2: base.InvalidRequest e2
     )
 }
