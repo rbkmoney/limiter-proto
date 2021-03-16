@@ -26,6 +26,7 @@ struct LimitContext {
     1: optional PartyID party_id
     2: optional ShopID shop_id
     3: optional LimitBody partial_body
+    4: optional base.Timestamp operation_timestamp
 }
 
 union LimitBody {
@@ -41,10 +42,9 @@ struct Limit {
 }
 
 struct LimitChange {
-   1: required LimitID id
-   2: required LimitChangeID change_id
-   3: required LimitBody body
-   4: required base.Timestamp operation_timestamp
+    1: required LimitID id
+    2: required LimitChangeID change_id
+    3: required LimitBody body
 }
 
 exception LimitNotFound {}
