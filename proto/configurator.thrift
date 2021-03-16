@@ -9,7 +9,8 @@ typedef base.ID LimitID
 
 struct LimitConfig {
     1: required LimitID id
-    2: optional string description
+    2: optional base.Timestamp created_at
+    3: optional string description
 }
 
 struct LimitCreateParams {
