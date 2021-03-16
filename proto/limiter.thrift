@@ -50,15 +50,6 @@ struct LimitChange {
 exception LimitNotFound {}
 exception LimitChangeNotFound {}
 
-struct ForbiddenOperationAmount {
-    1: required base.Cash amount
-    2: required base.CashRange allowed_range
-}
-
-exception InconsistentRequest {
-    1: optional ForbiddenOperationAmount forbidden_operation_amount
-}
-
 service Limiter {
     Limit Get(1: LimitID id, 2: LimitContext context) throws (
         1: LimitNotFound e1,
@@ -72,12 +63,6 @@ service Limiter {
         1: LimitNotFound e1,
         2: LimitChangeNotFound e2,
         3: base.InvalidRequest e3
-    )
-    Clock PartialCommit(1: LimitChange change, 2: Clock clock, 3: LimitContext context) throws (
-        1: LimitNotFound e1,
-        2: LimitChangeNotFound e2,
-        3: base.InvalidRequest e3,
-        4: InconsistentRequest e4
     )
     Clock Rollback(1: LimitChange change, 2: Clock clock, 3: LimitContext context) throws (
         1: LimitNotFound e1,

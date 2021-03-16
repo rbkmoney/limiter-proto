@@ -5,9 +5,12 @@ namespace java com.rbkmoney.limiter.configurator
 namespace erlang limiter_cfg
 
 typedef base.ID LimitName
+typedef base.ID LimitID
 
 struct LimitCreateParams {
-    1: optional LimitName name
+    1: required LimitID id
+    2: optional LimitName name
+    3: optional string description
 }
 
 struct LimitNameNotFound {}
