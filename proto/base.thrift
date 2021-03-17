@@ -66,6 +66,16 @@ union CashBound {
     2: Cash exclusive
 }
 
+struct AmountRange {
+    1: required AmountBound upper
+    2: required AmountBound lower
+}
+
+union AmountBound {
+    1: Amount inclusive
+    2: Amount exclusive
+}
+
 /**
  * Исключение, сигнализирующее о непригодных с точки зрения бизнес-логики входных данных
  */

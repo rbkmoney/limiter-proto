@@ -34,6 +34,11 @@ union LimitBody {
     2: base.Amount amount
 }
 
+union LimitBodyRange {
+    1: base.CashRange cash
+    2: base.AmountRange amount
+}
+
 struct Limit {
     1: required LimitID id
     2: required LimitBody body
@@ -49,6 +54,10 @@ struct LimitChange {
 
 exception LimitNotFound {}
 exception LimitChangeNotFound {}
+exception ForbiddenOperationAmount {
+    1: required LimitBody amount
+    2: required LimitBodyRange allowed_range
+}
 
 service Limiter {
     Limit Get(1: LimitID id, 2: Clock clock, 3: LimitContext context) throws (
@@ -62,7 +71,8 @@ service Limiter {
     Clock Commit(1: LimitChange change, 2: Clock clock, 3: LimitContext context) throws (
         1: LimitNotFound e1,
         2: LimitChangeNotFound e2,
-        3: base.InvalidRequest e3
+        3: base.InvalidRequest e3,
+        4: ForbiddenOperationAmount e4
     )
     Clock Rollback(1: LimitChange change, 2: Clock clock, 3: LimitContext context) throws (
         1: LimitNotFound e1,
