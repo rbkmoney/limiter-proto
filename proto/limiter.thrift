@@ -7,6 +7,8 @@ typedef base.ID LimitChangeID
 typedef base.ID LimitID
 typedef base.ID PartyID
 typedef base.ID ShopID
+typedef base.ID WalletID
+typedef base.ID IdentityID
 
 /**
  * https://en.wikipedia.org/wiki/Vector_clock
@@ -23,10 +25,12 @@ union Clock {
 }
 
 struct LimitContext {
-    1: optional PartyID party_id
-    2: optional ShopID shop_id
-    3: optional LimitBody partial_body
-    4: optional base.Timestamp operation_timestamp
+    1: optional base.Timestamp operation_timestamp
+    2: optional LimitBody partial_body
+    3: optional PartyID party_id
+    4: optional ShopID shop_id
+    5: optional WalletID wallet_id
+    6: optional IdentityID identity_id
 }
 
 union LimitBody {
