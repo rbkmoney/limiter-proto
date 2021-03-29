@@ -11,7 +11,6 @@ include "time_range.thrift"
 /// Domain
 
 typedef base.ID LimitRangeID
-typedef base.ID AccountID
 typedef base.Timestamp Timestamp
 
 struct LimitRange {

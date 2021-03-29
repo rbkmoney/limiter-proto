@@ -10,7 +10,7 @@ include "base.thrift"
 /// Domain
 
 typedef base.ID LimitRangeID
-typedef base.ID AccountID
+typedef base.AccountID AccountID
 typedef base.Timestamp Timestamp
 typedef base.Amount IntervalAmount
 

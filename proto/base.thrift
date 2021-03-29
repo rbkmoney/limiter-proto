@@ -13,6 +13,9 @@ typedef string Timestamp
 typedef string ID
 typedef i32 ObjectID
 
+/** Идентификатор аккаунта */
+typedef i64 AccountID
+
 /** Идентификатор некоторого события */
 typedef i64 EventID
 
