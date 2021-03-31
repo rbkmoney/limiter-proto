@@ -1,4 +1,5 @@
 include "base.thrift"
+include "limiter_context.thrift"
 
 namespace java com.rbkmoney.limiter
 namespace erlang limiter
@@ -9,6 +10,7 @@ typedef base.ID PartyID
 typedef base.ID ShopID
 typedef base.ID WalletID
 typedef base.ID IdentityID
+typedef limiter_context.LimitContext LimitContext
 
 /**
  * https://en.wikipedia.org/wiki/Vector_clock
@@ -22,15 +24,6 @@ struct VectorClock {
 **/
 union Clock {
     1: VectorClock vector
-}
-
-struct LimitContext {
-    1: optional base.Timestamp operation_timestamp
-    2: optional LimitBody partial_body
-    3: optional PartyID party_id
-    4: optional ShopID shop_id
-    5: optional WalletID wallet_id
-    6: optional IdentityID identity_id
 }
 
 union LimitBody {
@@ -53,7 +46,6 @@ struct Limit {
 struct LimitChange {
     1: required LimitID id
     2: required LimitChangeID change_id
-    3: required LimitBody body
 }
 
 exception LimitNotFound {}
