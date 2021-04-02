@@ -70,9 +70,4 @@ service Limiter {
         3: base.InvalidRequest e3,
         4: ForbiddenOperationAmount e4
     )
-    Clock Rollback(1: LimitChange change, 2: Clock clock, 3: LimitContext context) throws (
-        1: LimitNotFound e1,
-        2: LimitChangeNotFound e2,
-        3: base.InvalidRequest e3
-    )
 }

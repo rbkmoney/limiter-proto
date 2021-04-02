@@ -11,7 +11,6 @@ struct LimitContext {
  * Контекст, получаемый из сервисов, реализующих один из интерфейсов протокола
  * https://github.com/rbkmoney/damsel/tree/master/proto/payment_processing.thrift
  * (например invoicing в hellgate)
- * и содержащий _проверенную_ информацию
  */
 struct ContextPaymentProcessing {
     1: optional Invoice invoice
@@ -23,8 +22,8 @@ struct Invoice {
     3: optional Entity shop_id
     4: optional base.Cash cost
     5: optional base.Timestamp created_at
-    6: optional set<InvoicePayment> payments
-    7: optional set<InvoiceAdjustment> adjustments
+    6: optional InvoicePayment effective_payment
+    7: optional InvoiceAdjustment effective_adjustment
 }
 
 struct InvoiceAdjustment {
@@ -40,9 +39,9 @@ struct InvoicePayment {
     5: optional base.Timestamp created_at
     6: optional InvoicePaymentFlow flow
     7: optional Payer payer
-    8: optional list<InvoicePaymentAdjustment> adjustments
-    9: optional list<InvoicePaymentRefund> refunds
-    10: optional list<InvoicePaymentChargeback> chargebacks
+    8: optional InvoicePaymentAdjustment effective_adjustment
+    9: optional InvoicePaymentRefund effective_refund
+    10: optional InvoicePaymentChargeback effective_chargeback
 }
 
 /**
