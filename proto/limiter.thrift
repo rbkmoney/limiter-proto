@@ -26,19 +26,9 @@ union Clock {
     1: VectorClock vector
 }
 
-union LimitBody {
-    1: base.Cash cash
-    2: base.Amount amount
-}
-
-union LimitBodyRange {
-    1: base.CashRange cash
-    2: base.AmountRange amount
-}
-
 struct Limit {
     1: required LimitID id
-    2: required LimitBody body
+    2: required base.Amount amount
     3: optional base.Timestamp creation_time
     4: optional string description
 }
@@ -51,8 +41,8 @@ struct LimitChange {
 exception LimitNotFound {}
 exception LimitChangeNotFound {}
 exception ForbiddenOperationAmount {
-    1: required LimitBody amount
-    2: required LimitBodyRange allowed_range
+    1: required base.Amount amount
+    2: required base.AmountRange allowed_range
 }
 
 service Limiter {
