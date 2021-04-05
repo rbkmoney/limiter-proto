@@ -13,6 +13,7 @@ include "time_range.thrift"
 typedef base.ID LimitConfigID
 typedef base.Timestamp Timestamp
 typedef base.Amount ShardSize
+typedef base.CurrencySymbolicCode CurrencySymbolicCode
 
 struct LimitConfig {
     1: required LimitConfigID id
@@ -33,7 +34,9 @@ union LimitBodyType {
 }
 
 struct LimitBodyTypeAmount {}
-struct LimitBodyTypeCash {}
+struct LimitBodyTypeCash {
+    1: required CurrencySymbolicCode currency
+}
 
 
 union LimitType {
