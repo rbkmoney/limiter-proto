@@ -3,6 +3,8 @@ include "base.thrift"
 namespace java com.rbkmoney.limiter.context
 namespace erlang limiter_context
 
+typedef base.ID ID
+
 struct LimitContext {
     1: optional ContextPaymentProcessing payment_processing
 }
@@ -34,9 +36,9 @@ struct PaymentProcessingOperationInvoicePaymentRefund {}
 struct PaymentProcessingOperationInvoicePaymentChargeback {}
 
 struct Invoice {
-    1: optional string id
-    2: optional Entity owner_id
-    3: optional Entity shop_id
+    1: optional ID id
+    2: optional ID owner_id
+    3: optional ID shop_id
     4: optional base.Cash cost
     5: optional base.Timestamp created_at
     6: optional InvoicePayment effective_payment
@@ -44,13 +46,13 @@ struct Invoice {
 }
 
 struct InvoiceAdjustment {
-    1: optional string id
+    1: optional ID id
 }
 
 struct InvoicePayment {
-    1: optional string id
-    2: optional Entity owner_id
-    3: optional Entity shop_id
+    1: optional ID id
+    2: optional ID owner_id
+    3: optional ID shop_id
     4: optional base.Cash cost
     11: optional base.Cash capture_cost
     5: optional base.Timestamp created_at
@@ -83,30 +85,19 @@ struct CustomerPayer {}
 struct RecurrentPayer {}
 
 struct InvoicePaymentAdjustment {
-    1: optional string id
+    1: optional ID id
     2: optional base.Timestamp created_at
 }
 
 struct InvoicePaymentRefund {
-    1: optional string id
+    1: optional ID id
     2: optional base.Cash cost
     3: optional base.Timestamp created_at
 }
 
 struct InvoicePaymentChargeback {
-    1: optional string id
+    1: optional ID id
     2: optional base.Timestamp created_at
     3: optional base.Cash levy
     4: optional base.Cash body
-}
-
-/**
- * Нечто уникально идентифицируемое.
- *
- * Рекомендуется использовать для обеспечения прямой совместимости, в случае
- * например, когда в будущем мы захотим расширить набор атрибутов какой-либо
- * сущности, добавив в неё что-то кроме идентификатора.
- */
-struct Entity {
-    1: optional string id
 }
