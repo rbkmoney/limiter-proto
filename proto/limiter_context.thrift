@@ -13,8 +13,25 @@ struct LimitContext {
  * (например invoicing в hellgate)
  */
 struct ContextPaymentProcessing {
-    1: optional Invoice invoice
+    1: required PaymentProcessingOperation op
+    2: optional Invoice invoice
 }
+
+union PaymentProcessingOperation {
+    1: PaymentProcessingOperationInvoice invoice
+    2: PaymentProcessingOperationInvoiceAdjustment invoice_adjustment
+    3: PaymentProcessingOperationInvoicePayment invoice_payment
+    4: PaymentProcessingOperationInvoicePaymentAdjustment invoice_payment_adjustment
+    5: PaymentProcessingOperationInvoicePaymentRefund invoice_payment_refund
+    6: PaymentProcessingOperationInvoicePaymentChargeback invoice_payment_chargeback
+}
+
+struct PaymentProcessingOperationInvoice {}
+struct PaymentProcessingOperationInvoiceAdjustment {}
+struct PaymentProcessingOperationInvoicePayment {}
+struct PaymentProcessingOperationInvoicePaymentAdjustment {}
+struct PaymentProcessingOperationInvoicePaymentRefund {}
+struct PaymentProcessingOperationInvoicePaymentChargeback {}
 
 struct Invoice {
     1: optional string id
