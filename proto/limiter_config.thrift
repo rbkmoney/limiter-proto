@@ -23,6 +23,7 @@ struct LimitConfig {
     5: required Timestamp started_at
     6: required ShardSize shard_size
     7: required time_range.TimeRangeType time_range_type
+    11: required LimitContextType context_type
     8: optional LimitType type
     9: optional LimitScope scope
     10: optional string description
@@ -63,6 +64,12 @@ struct LimitScopeTypeParty {}
 struct LimitScopeTypeShop {}
 struct LimitScopeTypeWallet {}
 struct LimitScopeTypeIdentity {}
+
+union LimitContextType {
+    1: LimitContextTypePaymentProcessing payment_processing
+}
+
+struct LimitContextTypePaymentProcessing {}
 
 /// LimitConfig events
 
