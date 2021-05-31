@@ -19,11 +19,14 @@ struct VectorClock {
     1: required base.Opaque state
 }
 
+struct LatestClock {}
+
 /**
 * Структура, позволяющая установить причинно-следственную связь операций внутри сервиса
 **/
 union Clock {
     1: VectorClock vector
+    2: LatestClock latest
 }
 
 struct Limit {
