@@ -41,7 +41,7 @@ struct OperationLimitBehaviour {
 
 union OperationBehaviour {
     1: Subtraction subtraction
-    2: Additional addition
+    2: Addition addition
 }
 
 struct Subtraction {}
