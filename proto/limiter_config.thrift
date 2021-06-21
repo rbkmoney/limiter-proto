@@ -31,12 +31,7 @@ struct LimitConfig {
 }
 
 struct OperationLimitBehaviour {
-    1: optional OperationBehaviour invoice
-    2: optional OperationBehaviour invoice_adjustment
-    3: optional OperationBehaviour invoice_payment
-    4: optional OperationBehaviour invoice_payment_adjustment
-    5: optional OperationBehaviour invoice_payment_refund
-    6: optional OperationBehaviour invoice_payment_chargeback
+    1: optional OperationBehaviour invoice_payment_refund
 }
 
 union OperationBehaviour {
