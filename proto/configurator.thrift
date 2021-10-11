@@ -31,6 +31,10 @@ service Configurator {
         2: base.InvalidRequest e2
     )
 
+    LimitConfig Create2(1: limiter_config.LimitConfigParams params) throws (
+        1: base.InvalidRequest e1
+    )
+
     LimitConfig Get(1: LimitConfigID id) throws (
         1: LimitConfigNotFound e1,
         2: base.InvalidRequest e2

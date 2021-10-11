@@ -15,6 +15,19 @@ typedef base.Timestamp Timestamp
 typedef base.Amount ShardSize
 typedef base.CurrencySymbolicCode CurrencySymbolicCode
 
+struct LimitConfigParams {
+    1: required LimitConfigID id
+    2: required LimitBodyType body_type
+    3: required Timestamp started_at
+    4: required ShardSize shard_size
+    5: required time_range.TimeRangeType time_range_type
+    6: required LimitContextType context_type
+    7: required LimitType type
+    8: required LimitScope scope
+    9: optional string description
+    10: required OperationLimitBehaviour op_behaviour
+}
+
 struct LimitConfig {
     1: required LimitConfigID id
     2: required string processor_type
