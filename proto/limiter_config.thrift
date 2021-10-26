@@ -23,7 +23,7 @@ struct LimitConfigParams {
     5: required time_range.TimeRangeType time_range_type
     6: required LimitContextType context_type
     7: required LimitType type
-    8: required LimitScope scope
+    8: required set<LimitScope> scope
     9: optional string description
     10: required OperationLimitBehaviour op_behaviour
 }
