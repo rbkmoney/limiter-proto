@@ -38,9 +38,10 @@ struct LimitConfig {
     7: required time_range.TimeRangeType time_range_type
     11: required LimitContextType context_type
     8: optional LimitType type
-    9: optional LimitScope scope
+    9: optional LimitScope scope_deprecated
     10: optional string description
     12: optional OperationLimitBehaviour op_behaviour
+    13: optional set<LimitScope> scope
 }
 
 struct OperationLimitBehaviour {
