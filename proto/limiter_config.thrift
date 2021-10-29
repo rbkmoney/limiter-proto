@@ -23,7 +23,7 @@ struct LimitConfigParams {
     5: required time_range.TimeRangeType time_range_type
     6: required LimitContextType context_type
     7: required LimitType type
-    8: required set<LimitScope> scope
+    8: required set<LimitScope> scopes
     9: optional string description
     10: required OperationLimitBehaviour op_behaviour
 }
@@ -38,10 +38,12 @@ struct LimitConfig {
     7: required time_range.TimeRangeType time_range_type
     11: required LimitContextType context_type
     8: optional LimitType type
+    // Возможно, это поле так и останется т.к. конфиги создаются разово, и
+    // помимо machinegun попадает и в kafka
     9: optional LimitScope scope_deprecated
     10: optional string description
     12: optional OperationLimitBehaviour op_behaviour
-    13: optional set<LimitScope> scope
+    13: optional set<LimitScope> scopes
 }
 
 struct OperationLimitBehaviour {
