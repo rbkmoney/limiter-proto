@@ -7,6 +7,7 @@ typedef base.ID ID
 
 struct LimitContext {
     1: optional ContextPaymentProcessing payment_processing
+    2: optional ContextWalletWithdrawal wallet_withdrawal
 }
 
 /**
@@ -100,4 +101,53 @@ struct InvoicePaymentChargeback {
     2: optional base.Timestamp created_at
     3: optional base.Cash levy
     4: optional base.Cash body
+}
+
+/**
+ * Контекст, получаемый из сервисов, реализующих один из интерфейсов протокола
+ * https://github.com/rbkmoney/fistful-proto/blob/master/proto/withdrawal.thrift
+ * (например withdrawal-management в fistful-server)
+ */
+struct ContextWalletWithdrawal {
+    1: optional ContextWalletWithdrawalOperation op
+    2: optional Withdrawal withdrawal
+}
+
+union ContextWalletWithdrawalOperation {
+    1: ContextWalletWithdrawalOperationWithdrawal withdrawal
+    2: ContextWalletWithdrawalOperationWithdrawalAdjustment withdrawal_adjustment
+}
+
+struct ContextWalletWithdrawalOperationWithdrawal {}
+struct ContextWalletWithdrawalOperationWithdrawalAdjustment {}
+
+struct Withdrawal {
+    1: optional ID id
+    3: optional ID owner_id
+    4: optional ID wallet_id
+    5: optional ID destination_id
+    6: optional base.Cash body
+    7: optional base.Timestamp created_at
+    8: optional WithdrawalRoute effective_route
+    9: optional WithdrawalQuote quote
+    10: optional WithdrawalAdjustment effective_adjustment
+}
+
+struct WithdrawalRoute {
+    1: optional ID provider_id
+    2: optional ID terminal_id
+}
+
+struct WithdrawalQuote {
+    1: optional base.Cash cash_from
+    2: optional base.Cash cash_to
+    3: optional base.Timestamp created_at
+    4: optional base.Timestamp expires_on
+    5: optional WithdrawalRoute route
+}
+
+struct WithdrawalAdjustment {
+    1: optional ID id
+    2: optional base.Timestamp created_at
+    3: optional base.Timestamp operation_timestamp
 }
